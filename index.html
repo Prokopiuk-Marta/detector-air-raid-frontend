@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detector Air Raid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="background" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="container header__inner">
+        <div class="logo">
+          <span class="logo__pulse" aria-hidden="true"></span>
+          <span class="logo__text">Detector Air Raid</span>
+        </div>
+        <div class="header__meta">
+          <span id="last-updated" class="mono">Оновлення...</span>
+          <button id="reload-button" class="button" type="button">Оновити</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <h1>Чи працює сервіс, коли в Києві тривога?</h1>
+        <p>Стежимо за Дією, Укрзалізницею, monobank і Приват24 та зіставляємо їхню роботу з тривогами й відключеннями світла.</p>
+      </section>
+
+      <div id="error-banner" class="error-banner" hidden></div>
+
+      <section id="outage-banner" class="outage-banner" aria-live="polite">
+        <span class="outage-banner__icon" aria-hidden="true">⚡</span>
+        <span id="outage-text">Перевіряємо відключення світла...</span>
+      </section>
+
+      <section class="block">
+        <h2 class="block__title">Сервіси</h2>
+        <div id="services-list" class="services-grid">
+          <div class="card card--skeleton"></div>
+          <div class="card card--skeleton"></div>
+          <div class="card card--skeleton"></div>
+          <div class="card card--skeleton"></div>
+        </div>
+      </section>
+
+      <div class="columns">
+        <section class="block">
+          <h2 class="block__title">Активні інциденти</h2>
+          <ul id="incidents-list" class="list">
+            <li class="list__empty">Завантаження...</li>
+          </ul>
+        </section>
+
+        <section class="block">
+          <h2 class="block__title">Останні відключення світла</h2>
+          <ul id="outages-list" class="list">
+            <li class="list__empty">Завантаження...</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>Дані: власний API на <span class="mono">127.0.0.1:8000</span>. Оновлюється автоматично щохвилини.</p>
+        <p>Контур карти: <a href="https://mapsvg.com/maps/ukraine" target="_blank" rel="noopener">MapSVG</a>, ліцензія <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>.</p>
+      </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
