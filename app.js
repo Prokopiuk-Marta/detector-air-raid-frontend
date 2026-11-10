@@ -31,6 +31,7 @@ function hostOf(url) {
   }
 }
 
+// ---------- Сервіси ----------
 
 function renderServiceCard(service) {
   const status = service.status || "unknown";
@@ -83,6 +84,49 @@ function renderServices(services) {
   services.forEach((service) => $list.append(renderServiceCard(service)));
 }
 
+// ---------- Тривоги ----------
+
+const ALERT_LEVELS = {
+  yellow: {
+    title: "Тривога в Києві · жовтий рівень",
+    hint: "Загроза ударних дронів",
+  },
+  red: {
+    title: "Тривога в Києві · червоний рівень",
+    hint: "Ракетна або масована загроза. Пройдіть в укриття",
+  },
+};
+
+function formatDuration(minutes) {
+  if (minutes < 60) {
+    return minutes + " хв";
+  }
+  return Math.floor(minutes / 60) + " год " + (minutes % 60) + " хв";
+}
+
+function renderAlertBanner(activeAlerts) {
+  const $banner = $("#alert-banner").removeClass("alert-banner--yellow alert-banner--red");
+
+  if (activeAlerts.length === 0) {
+    $("#alert-title").text("У Києві зараз тривоги немає");
+    $("#alert-details").text("");
+    return;
+  }
+
+  // Якщо тривог кілька, показуємо найнебезпечнішу.
+  const alert = activeAlerts.find((item) => item.alert_level === "red") || activeAlerts[0];
+  const level = ALERT_LEVELS[alert.alert_level] ? alert.alert_level : "red";
+
+  $banner.addClass("alert-banner--" + level);
+  $("#alert-title").text(ALERT_LEVELS[level].title);
+  $("#alert-details").text(
+    ALERT_LEVELS[level].hint +
+    " · з " + formatTime(alert.started_at) +
+    " · триває " + formatDuration(alert.duration_minutes)
+  );
+}
+
+// ---------- Відключення світла ----------
 
 function renderOutageBanner(activeOutages) {
   const $banner = $("#outage-banner");
@@ -118,6 +162,7 @@ function renderOutages(outages) {
   });
 }
 
+// ---------- Інциденти ----------
 
 function renderIncidents(incidents) {
   const $list = $("#incidents-list").empty();
@@ -148,6 +193,7 @@ function renderIncidents(incidents) {
   });
 }
 
+// ---------- Завантаження ----------
 
 function showError(message) {
   $("#error-banner").text(message).prop("hidden", false);
@@ -162,10 +208,12 @@ function loadAll() {
     $.getJSON(API_BASE + "/services/"),
     $.getJSON(API_BASE + "/outages/?active=true"),
     $.getJSON(API_BASE + "/outages/"),
-    $.getJSON(API_BASE + "/incidents/?active=true")
+    $.getJSON(API_BASE + "/incidents/?active=true"),
+    $.getJSON(API_BASE + "/alerts/?active=true")
   )
-    .done((servicesRes, activeOutagesRes, outagesRes, incidentsRes) => {
+    .done((servicesRes, activeOutagesRes, outagesRes, incidentsRes, alertsRes) => {
       hideError();
+      renderAlertBanner(alertsRes[0].results);
       renderServices(servicesRes[0]);
       renderOutageBanner(activeOutagesRes[0].results);
       renderOutages(outagesRes[0].results);

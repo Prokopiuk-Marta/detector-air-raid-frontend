@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Detector Air Raid</title>
+    <title>Detector bro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -14,10 +14,14 @@
 
     <header class="header">
       <div class="container header__inner">
-        <div class="logo">
+        <a class="logo" href="index.html" title="На головну">
           <span class="logo__pulse" aria-hidden="true"></span>
-          <span class="logo__text">Detector Air Raid</span>
-        </div>
+          <span class="logo__text">Detector bro</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html" class="active">Огляд</a>
+          <a href="stats.html">Статистика</a>
+        </nav>
         <div class="header__meta">
           <span id="last-updated" class="mono">Оновлення...</span>
           <button id="reload-button" class="button" type="button">Оновити</button>
@@ -32,6 +36,14 @@
       </section>
 
       <div id="error-banner" class="error-banner" hidden></div>
+
+      <section id="alert-banner" class="alert-banner" aria-live="polite">
+        <span class="alert-banner__dot" aria-hidden="true"></span>
+        <div class="alert-banner__body">
+          <p id="alert-title" class="alert-banner__title">Перевіряємо тривоги в Києві...</p>
+          <p id="alert-details" class="alert-banner__details"></p>
+        </div>
+      </section>
 
       <section id="outage-banner" class="outage-banner" aria-live="polite">
         <span class="outage-banner__icon" aria-hidden="true">⚡</span>

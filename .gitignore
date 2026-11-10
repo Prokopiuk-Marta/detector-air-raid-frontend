@@ -2,6 +2,10 @@
 .idea/
 .vscode/
 
+# Віртуальне середовище Python
+.venv/
+venv/
+
 # Системні файли
 .DS_Store
 Thumbs.db
