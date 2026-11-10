@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Реєстрація · Detector bro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="background" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="container header__inner">
+        <a class="logo" href="index.html" title="На головну">
+          <span class="logo__pulse" aria-hidden="true"></span>
+          <span class="logo__text">Detector bro</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Огляд</a>
+          <a href="stats.html">Статистика</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="auth-card">
+        <h1>Реєстрація</h1>
+        <p class="auth-card__sub">Після реєстрації ви зможете повідомляти про відключення світла.</p>
+
+        <div id="form-error" class="error-banner" hidden></div>
+
+        <form id="register-form" class="form" novalidate>
+          <label class="form__field" data-field="username">
+            <span>Ім'я користувача *</span>
+            <input name="username" type="text" maxlength="150" autocomplete="username">
+          </label>
+
+          <label class="form__field" data-field="email">
+            <span>Email *</span>
+            <input name="email" type="email" maxlength="254" autocomplete="email">
+          </label>
+
+          <label class="form__field" data-field="first_name">
+            <span>Ім'я</span>
+            <input name="first_name" type="text" maxlength="150" autocomplete="given-name">
+          </label>
+
+          <label class="form__field" data-field="last_name">
+            <span>Прізвище</span>
+            <input name="last_name" type="text" maxlength="150" autocomplete="family-name">
+          </label>
+
+          <label class="form__field" data-field="password">
+            <span>Пароль * (щонайменше 8 символів, не лише цифри)</span>
+            <input name="password" type="password" maxlength="128" autocomplete="new-password">
+          </label>
+
+          <label class="form__field" data-field="password_confirm">
+            <span>Повторіть пароль *</span>
+            <input name="password_confirm" type="password" maxlength="128" autocomplete="new-password">
+          </label>
+
+          <button id="submit-button" class="button button--primary" type="submit">Зареєструватися</button>
+        </form>
+
+        <p class="auth-card__switch">
+          Уже є акаунт? <a id="login-link" href="login.html">Увійти</a>
+        </p>
+      </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="auth.js"></script>
+    <script>
+      redirectIfLoggedIn();
+
+      $("#login-link").attr("href", "login.html" + window.location.search);
+
+      function clearErrors() {
+        $("#form-error").prop("hidden", true);
+        $(".form__field").removeClass("has-error");
+        $(".form__error").remove();
+      }
+
+      // errors: {"email": ["Користувач з таким email уже існує."], ...}
+      function showFieldErrors(errors) {
+        Object.keys(errors).forEach(function (field) {
+          const messages = [].concat(errors[field]);
+          const $field = $('.form__field[data-field="' + field + '"]');
+
+          if ($field.length === 0) {
+            // Помилка не прив'язана до конкретного поля (non_field_errors).
+            $("#form-error").text(messages.join(" ")).prop("hidden", false);
+            return;
+          }
+          $field.addClass("has-error");
+          messages.forEach(function (text) {
+            $field.append($("<span>").addClass("form__error").text(text));
+          });
+        });
+      }
+
+      // Швидка перевірка в браузері, щоб не чекати відповіді сервера.
+      // Головна перевірка все одно на бекенді.
+      function validate(data) {
+        const errors = {};
+        if (!data.username) {
+          errors.username = ["Введіть ім'я користувача."];
+        }
+        if (!data.email) {
+          errors.email = ["Введіть email."];
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+          errors.email = ["Введіть коректний email, наприклад name@example.com."];
+        }
+        if (data.password.length < 8) {
+          errors.password = ["Пароль має містити щонайменше 8 символів."];
+        }
+        if (data.password !== data.password_confirm) {
+          errors.password_confirm = ["Паролі не збігаються."];
+        }
+        return errors;
+      }
+
+      $("#register-form").on("submit", function (event) {
+        event.preventDefault();
+        clearErrors();
+
+        const data = {};
+        $(this).serializeArray().forEach(function (item) {
+          data[item.name] = item.name.startsWith("password") ? item.value : item.value.trim();
+        });
+
+        const errors = validate(data);
+        if (Object.keys(errors).length > 0) {
+          showFieldErrors(errors);
+          return;
+        }
+
+        const $button = $("#submit-button").prop("disabled", true).text("Реєструємо...");
+
+        $.ajax({
+          method: "POST",
+          url: AUTH_URL + "/register/",
+          contentType: "application/json",
+          data: JSON.stringify(data),
+          dataType: "json",
+        })
+          .then(function () {
+            // Одразу входимо, щоб не вводити дані вдруге.
+            return login(data.username, data.password);
+          })
+          .then(function () {
+            window.location.href = nextPage();
+          })
+          .catch(function (xhr) {
+            const body = xhr.responseJSON;
+            if (xhr.status === 400 && body && body.error && body.error.details) {
+              showFieldErrors(body.error.details);
+            } else {
+              $("#form-error").text(apiErrorMessage(xhr)).prop("hidden", false);
+            }
+            $button.prop("disabled", false).text("Зареєструватися");
+          });
+      });
+    </script>
+  </body>
+</html>
