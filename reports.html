@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Мої заявки · Detector bro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="auth.js"></script>
+    <script>
+      // Перевіряємо ще до показу сторінки: гість одразу йде на вхід.
+      requireLogin();
+    </script>
+  </head>
+  <body>
+    <div class="background" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="container header__inner">
+        <a class="logo" href="index.html" title="На головну">
+          <span class="logo__pulse" aria-hidden="true"></span>
+          <span class="logo__text">Detector bro</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Огляд</a>
+          <a href="stats.html">Статистика</a>
+          <a href="reports.html" class="active">Мої заявки</a>
+        </nav>
+        <div class="header__meta">
+          <div id="auth-area" class="auth-area"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <h1>У мене немає світла</h1>
+        <p>Повідомте, що у вашій групі зараз відключення. Заявки бачите ви та адміністратор.</p>
+      </section>
+
+      <div id="error-banner" class="error-banner" hidden></div>
+
+      <div class="columns">
+        <section class="block">
+          <h2 class="block__title">Нова заявка</h2>
+          <form id="report-form" class="form auth-card form-card" novalidate>
+            <label class="form__field" data-field="group">
+              <span>Група відключень *</span>
+              <select id="group" name="group"></select>
+            </label>
+
+            <label class="form__field" data-field="comment">
+              <span>Коментар</span>
+              <input id="comment" name="comment" type="text" maxlength="255" placeholder="Наприклад: немає світла з 18:00">
+            </label>
+
+            <button id="submit-button" class="button button--primary" type="submit">Надіслати заявку</button>
+            <p id="form-success" class="form__success" hidden>Заявку надіслано.</p>
+          </form>
+        </section>
+
+        <section class="block">
+          <h2 id="list-title" class="block__title">Мої заявки</h2>
+          <ul id="reports-list" class="list">
+            <li class="list__empty">Завантаження...</li>
+          </ul>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const REPORTS_URL = "http://127.0.0.1:8000/api/v1/power-reports/";
+
+      const GROUPS = [];
+      for (let main = 1; main <= 6; main++) {
+        GROUPS.push(main + ".1", main + ".2");
+      }
+
+      let isAdmin = false;
+
+      function formatDateTime(isoString) {
+        return new Date(isoString).toLocaleString("uk-UA", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      // Спільна обробка помилок: прострочений вхід → на сторінку входу.
+      function handleError(xhr) {
+        if (xhr.status === 401) {
+          clearTokens();
+          goToLogin();
+          return;
+        }
+        $("#error-banner").text(apiErrorMessage(xhr)).prop("hidden", false);
+      }
+
+      function renderReports(reports) {
+        const $list = $("#reports-list").empty();
+        if (reports.length === 0) {
+          $list.append($("<li>").addClass("list__empty").text("Заявок поки немає."));
+          return;
+        }
+
+        reports.forEach(function (report) {
+          const $title = $("<p>").addClass("list__title")
+            .append($("<span>").addClass("tag tag--warn").text("група " + report.group));
+          if (isAdmin) {
+            $title.append($("<span>").addClass("tag").text(report.user));
+          }
+
+          const $delete = $("<button>")
+            .addClass("button button--small")
+            .attr("type", "button")
+            .text(isAdmin ? "Видалити" : "Скасувати")
+            .on("click", function () {
+              deleteReport(report.id);
+            });
+
+          $list.append(
+            $("<li>").addClass("list__item report")
+              .append(
+                $("<div>")
+                  .append($title)
+                  .append($("<p>").addClass("report__comment").text(report.comment || "Без коментаря"))
+                  .append($("<span>").addClass("list__meta").text(formatDateTime(report.created_at)))
+              )
+              .append($delete)
+          );
+        });
+      }
+
+      function loadReports() {
+        apiRequest("GET", REPORTS_URL)
+          .then(function (page) {
+            renderReports(page.results);
+          })
+          .catch(handleError);
+      }
+
+      function deleteReport(id) {
+        apiRequest("DELETE", REPORTS_URL + id + "/")
+          .then(loadReports)
+          .catch(handleError);
+      }
+
+      $(function () {
+        GROUPS.forEach(function (group) {
+          $("#group").append($("<option>").val(group).text(group));
+        });
+
+        // Адмін бачить заявки всіх користувачів.
+        apiRequest("GET", AUTH_URL + "/me/").then(function (user) {
+          isAdmin = user.is_staff;
+          if (isAdmin) {
+            $("#list-title").text("Усі заявки (ви адміністратор)");
+          }
+          loadReports();
+        }, handleError);
+
+        $("#report-form").on("submit", function (event) {
+          event.preventDefault();
+          $("#error-banner, #form-success").prop("hidden", true);
+          $(".form__field").removeClass("has-error");
+          $(".form__error").remove();
+
+          const $button = $("#submit-button").prop("disabled", true);
+
+          apiRequest("POST", REPORTS_URL, {
+            group: $("#group").val(),
+            comment: $("#comment").val().trim(),
+          })
+            .then(function () {
+              $("#comment").val("");
+              $("#form-success").prop("hidden", false);
+              loadReports();
+            })
+            .catch(function (xhr) {
+              const body = xhr.responseJSON;
+              if (xhr.status === 400 && body && body.error) {
+                Object.keys(body.error.details).forEach(function (field) {
+                  $('.form__field[data-field="' + field + '"]')
+                    .addClass("has-error")
+                    .append($("<span>").addClass("form__error").text(body.error.details[field].join(" ")));
+                });
+              } else {
+                handleError(xhr);
+              }
+            })
+            .always(function () {
+              $button.prop("disabled", false);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>

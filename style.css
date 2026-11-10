@@ -43,7 +43,6 @@ a {
   padding: 0 16px;
 }
 
-/* ---------- Фон ---------- */
 
 .background {
   position: fixed;
@@ -60,7 +59,6 @@ a {
   background: linear-gradient(180deg, rgba(5, 6, 8, 0.2) 0%, rgba(5, 6, 8, 0.6) 100%);
 }
 
-/* ---------- Шапка ---------- */
 
 .header {
   position: sticky;
@@ -125,8 +123,6 @@ a.logo {
   border-color: var(--accent);
 }
 
-/* ---------- Меню ---------- */
-
 .nav {
   display: flex;
   gap: 6px;
@@ -146,7 +142,6 @@ a.logo {
   color: var(--text);
 }
 
-/* ---------- Hero ---------- */
 
 .hero {
   padding: 56px 0 24px;
@@ -166,7 +161,6 @@ a.logo {
   font-size: 17px;
 }
 
-/* ---------- Плашки ---------- */
 
 .error-banner,
 .outage-banner {
@@ -199,7 +193,6 @@ a.logo {
   background: rgba(255, 200, 87, 0.08);
 }
 
-/* ---------- Плашка тривоги ---------- */
 
 .alert-banner {
   display: flex;
@@ -269,7 +262,6 @@ a.logo {
   font-size: 20px;
 }
 
-/* ---------- Блоки ---------- */
 
 .block {
   margin: 32px 0;
@@ -290,7 +282,6 @@ a.logo {
   gap: 24px;
 }
 
-/* ---------- Картки сервісів ---------- */
 
 .services-grid {
   display: grid;
@@ -414,7 +405,6 @@ a.logo {
   background: linear-gradient(90deg, var(--accent), var(--up));
 }
 
-/* ---------- Скелетони ---------- */
 
 .card--skeleton {
   background: linear-gradient(100deg, var(--surface) 30%, rgba(143, 227, 255, 0.08) 50%, var(--surface) 70%);
@@ -422,7 +412,6 @@ a.logo {
   animation: shimmer 1.4s infinite;
 }
 
-/* ---------- Списки ---------- */
 
 .list {
   margin: 0;
@@ -473,7 +462,6 @@ a.logo {
   color: var(--warn);
 }
 
-/* ---------- Футер ---------- */
 
 .footer {
   margin-top: 48px;
@@ -487,7 +475,6 @@ a.logo {
   margin: 4px 0;
 }
 
-/* ---------- Анімації ---------- */
 
 @keyframes pulse {
   0% {
@@ -555,7 +542,6 @@ a.logo {
   }
 }
 
-/* ---------- Телефони ---------- */
 
 @media (max-width: 720px) {
   .header__inner {
@@ -581,4 +567,127 @@ a.logo {
   #last-updated {
     display: none;
   }
+}
+
+
+.auth-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-user {
+  color: var(--text);
+  font: 600 13px var(--mono);
+}
+
+.auth-card {
+  max-width: 420px;
+  margin: 56px auto;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-strong);
+  backdrop-filter: blur(10px);
+}
+
+.auth-card h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+}
+
+.auth-card__sub,
+.auth-card__switch {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.form__field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.form__field input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: 400 15px var(--font);
+}
+
+.form__field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form__field.has-error input {
+  border-color: var(--down);
+}
+
+.form__error {
+  color: #ffb3b3;
+  font-size: 12px;
+}
+
+.button--primary {
+  padding: 11px 16px;
+  background: rgba(95, 212, 255, 0.2);
+  border-color: var(--accent);
+  font-size: 14px;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.form-card {
+  margin: 0;
+  max-width: none;
+}
+
+.form__field select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--text);
+  font: 600 15px var(--mono);
+}
+
+.form__success {
+  margin: 0;
+  color: var(--up);
+  font-size: 13px;
+}
+
+.form__success[hidden] {
+  display: none;
+}
+
+.button--small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.report {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.report__comment {
+  margin: 4px 0;
+  color: var(--text);
+  font-size: 14px;
 }

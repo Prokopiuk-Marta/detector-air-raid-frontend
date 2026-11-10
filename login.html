@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вхід · Detector bro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="background" aria-hidden="true"></div>
+
+    <header class="header">
+      <div class="container header__inner">
+        <a class="logo" href="index.html" title="На головну">
+          <span class="logo__pulse" aria-hidden="true"></span>
+          <span class="logo__text">Detector bro</span>
+        </a>
+        <nav class="nav">
+          <a href="index.html">Огляд</a>
+          <a href="stats.html">Статистика</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="auth-card">
+        <h1>Вхід</h1>
+        <p class="auth-card__sub">Увійдіть, щоб повідомляти про відключення світла.</p>
+
+        <div id="form-error" class="error-banner" hidden></div>
+
+        <form id="login-form" class="form" novalidate>
+          <label class="form__field">
+            <span>Ім'я користувача</span>
+            <input id="username" name="username" type="text" autocomplete="username" required>
+          </label>
+
+          <label class="form__field">
+            <span>Пароль</span>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+          </label>
+
+          <button id="submit-button" class="button button--primary" type="submit">Увійти</button>
+        </form>
+
+        <p class="auth-card__switch">
+          Немає акаунта? <a id="register-link" href="register.html">Зареєструватися</a>
+        </p>
+      </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="auth.js"></script>
+    <script>
+      // Хто вже увійшов, на сторінку входу не потрапляє.
+      redirectIfLoggedIn();
+
+      // Передаємо next далі, якщо людина перейде на реєстрацію.
+      $("#register-link").attr("href", "register.html" + window.location.search);
+
+      function showError(text) {
+        $("#form-error").text(text).prop("hidden", false);
+      }
+
+      $("#login-form").on("submit", function (event) {
+        event.preventDefault();
+        $("#form-error").prop("hidden", true);
+
+        const username = $("#username").val().trim();
+        const password = $("#password").val();
+        if (!username || !password) {
+          showError("Введіть ім'я користувача та пароль.");
+          return;
+        }
+
+        const $button = $("#submit-button").prop("disabled", true).text("Входимо...");
+
+        login(username, password)
+          .then(function () {
+            window.location.href = nextPage();
+          })
+          .catch(function (xhr) {
+            showError(apiErrorMessage(xhr));
+            $button.prop("disabled", false).text("Увійти");
+          });
+      });
+    </script>
+  </body>
+</html>
